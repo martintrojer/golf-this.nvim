@@ -29,6 +29,29 @@
 
 Repository: [https://github.com/martintrojer/golf-this.nvim](https://github.com/martintrojer/golf-this.nvim)
 
+## API keys (recommended)
+
+Use environment variables for API keys. Do not put raw API keys in your Neovim config.
+
+```bash
+export OPENAI_API_KEY="..."
+export OPENROUTER_API_KEY="..."
+export ANTHROPIC_API_KEY="..."
+```
+
+`api_key_env` must be the variable name (for example `"OPENROUTER_API_KEY"`), not the key value.
+
+If omitted, `golf-this` infers defaults for common providers:
+- `openai` or `api.openai.com` -> `OPENAI_API_KEY`
+- `openrouter` or `openrouter.ai` -> `OPENROUTER_API_KEY`
+- `anthropic` or `anthropic.com` -> `ANTHROPIC_API_KEY`
+
+`golf-this` can also infer provider defaults (`kind`, `url`, and default model) from provider name/URL family for:
+- OpenAI
+- OpenRouter
+- Anthropic
+- Ollama
+
 ### lazy.nvim
 
 ```lua
@@ -130,6 +153,9 @@ If you edit help docs, regenerate tags:
 - Visual/range context:
   1. Select lines in Visual mode.
   2. Run `:'<,'>GolfThis`
+- Health check:
+  - Run `:GolfThisHealth` to validate provider config, key resolution, and endpoint reachability.
+  - Run `:checkhealth golf_this` for Neovim health-style diagnostics.
 
 In the response popup:
 - Press `<Esc>` or `q` to close.

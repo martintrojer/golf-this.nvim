@@ -10,8 +10,9 @@ CONTENTS                                                    *golf-this-contents*
 3. Setup.....................................................|golf-this-setup|
 4. Commands...............................................|golf-this-commands|
 5. Usage.....................................................|golf-this-usage|
-6. Configuration.............................................|golf-this-config|
-7. Providers.............................................|golf-this-providers|
+6. API Keys...............................................|golf-this-api-keys|
+7. Configuration.............................................|golf-this-config|
+8. Providers.............................................|golf-this-providers|
 
 ===============================================================================
 1. Introduction                                                 *golf-this-intro*
@@ -57,6 +58,13 @@ Example with lazy.nvim:
   Same command with range context (typically from Visual mode). Selected lines
   are sent as explicit context in addition to current cursor line and excerpt.
 
+:GolfThisHealth                                        *:GolfThisHealth*
+  Validate provider settings, API key resolution, adapter validation, and
+  endpoint reachability.
+
+:checkhealth golf_this
+  Run Neovim health checks for golf-this configuration and dependencies.
+
 ===============================================================================
 5. Usage                                                       *golf-this-usage*
 
@@ -77,7 +85,32 @@ Answer popup:
 - <Esc> or q close
 
 ===============================================================================
-6. Configuration                                               *golf-this-config*
+6. API Keys                                                   *golf-this-api-keys*
+
+Use environment variables for keys. Do not hardcode raw API keys in Lua config.
+
+Example shell setup:
+
+>sh
+  export OPENAI_API_KEY="..."
+  export OPENROUTER_API_KEY="..."
+  export ANTHROPIC_API_KEY="..."
+<
+
+IMPORTANT:
+- `api_key_env` is the variable name, e.g. `"OPENROUTER_API_KEY"`.
+- Do not set `api_key_env` to the key value itself.
+
+If `api_key_env` is omitted, golf-this infers common defaults:
+- OpenAI name/url -> `OPENAI_API_KEY`
+- OpenRouter name/url -> `OPENROUTER_API_KEY`
+- Anthropic name/url or kind -> `ANTHROPIC_API_KEY`
+
+golf-this can also infer provider defaults (`kind`, `url`, and default model)
+from provider name/URL family for OpenAI, OpenRouter, Anthropic, and Ollama.
+
+===============================================================================
+7. Configuration                                               *golf-this-config*
 
 >lua
   require("golf_this").setup({
@@ -97,7 +130,7 @@ Answer popup:
 <
 
 ===============================================================================
-7. Providers                                               *golf-this-providers*
+8. Providers                                               *golf-this-providers*
 
 Built-in provider templates:
 - `openai` (OpenAI chat completions)

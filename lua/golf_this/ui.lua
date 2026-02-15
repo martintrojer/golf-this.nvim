@@ -5,7 +5,8 @@ local event = require("nui.utils.autocmd").event
 local M = {}
 
 function M.prompt(on_submit)
-  local input = Input({
+  local input
+  input = Input({
     relative = "cursor",
     position = {
       row = 1,
