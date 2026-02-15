@@ -1,8 +1,7 @@
 local M = {}
 
 local defaults = {
-	provider = "openai",
-	include_in_prompt = "",
+	profile = "promptly",
 	providers = {
 		openai = {
 			kind = "openai_compatible",
@@ -16,7 +15,7 @@ local defaults = {
 			model = "anthropic/claude-3.5-sonnet",
 			api_key_env = "OPENROUTER_API_KEY",
 			referer = nil,
-			title = "golf-this.nvim",
+			title = "promptly.nvim",
 		},
 		anthropic = {
 			kind = "anthropic",
@@ -33,7 +32,33 @@ local defaults = {
 			api_key_env = nil,
 		},
 	},
-	max_context_lines = 400,
+	profiles = {
+		promptly = {
+			provider = "openai",
+			include_in_prompt = "",
+			context = {
+				max_context_lines = 400,
+				include_current_line = true,
+				include_selection = true,
+			},
+			contract = {
+				format = "json",
+			},
+			apply = {
+				default = "first_suggestion",
+				handlers = {
+					keys = "feedkeys",
+					replace_selection = "replace_selection",
+					replace_buffer = "replace_buffer",
+					ex_command = "nvim_cmd",
+				},
+			},
+			ui = {
+				prompt_title = " Promptly Prompt ",
+				result_title = " Promptly Suggestions ",
+			},
+		},
+	},
 }
 
 M.values = vim.deepcopy(defaults)
@@ -69,7 +94,7 @@ local function apply_inferred_defaults(provider_name, provider)
 		provider.kind = provider.kind or "openai_compatible"
 		provider.url = provider.url or "https://openrouter.ai/api/v1/chat/completions"
 		provider.model = provider.model or "anthropic/claude-3.5-sonnet"
-		provider.title = provider.title or "golf-this.nvim"
+		provider.title = provider.title or "promptly.nvim"
 		if not provider.api_key and not provider.api_key_env then
 			provider.api_key_env = "OPENROUTER_API_KEY"
 		end
@@ -110,7 +135,12 @@ function M.setup(opts)
 end
 
 function M.current_provider()
-	local provider_name = M.values.provider
+	local profile = M.current_profile()
+	if not profile then
+		return nil
+	end
+
+	local provider_name = profile.provider
 	local provider = M.values.providers[provider_name]
 	if not provider then
 		return nil
@@ -119,6 +149,19 @@ function M.current_provider()
 	local resolved = vim.deepcopy(provider)
 	apply_inferred_defaults(provider_name, resolved)
 	return resolved
+end
+
+function M.current_profile()
+	local profile_name = M.values.profile
+	local profile = M.values.profiles and M.values.profiles[profile_name] or nil
+	if not profile then
+		return nil
+	end
+	return vim.deepcopy(profile)
+end
+
+function M.current_profile_name()
+	return M.values.profile
 end
 
 return M

@@ -1,4 +1,4 @@
-local shared = require("golf_this.adapters.shared")
+local shared = require("promptly.adapters.shared")
 
 local M = {}
 
@@ -36,7 +36,7 @@ function M.new(cfg)
 			end
 			return nil
 		end,
-		build_request = function(prompt, request)
+		build_request = function(prompt, request, profile)
 			local headers = {
 				["Content-Type"] = "application/json",
 			}
@@ -57,8 +57,8 @@ function M.new(cfg)
 				model = cfg.model,
 				temperature = 0,
 				messages = {
-					{ role = "system", content = shared.system_prompt() },
-					{ role = "user", content = shared.build_user_message(prompt, request) },
+					{ role = "system", content = shared.system_prompt(profile) },
+					{ role = "user", content = shared.build_user_message(prompt, request, profile) },
 				},
 			}
 

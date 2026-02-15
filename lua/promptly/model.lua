@@ -1,5 +1,5 @@
-local adapters = require("golf_this.adapters")
-local transport = require("golf_this.transport")
+local adapters = require("promptly.adapters")
+local transport = require("promptly.transport")
 
 local M = {}
 
@@ -28,21 +28,45 @@ local function decode_json(text)
 	return nil
 end
 
+local function normalize_suggestion(raw)
+	if type(raw) ~= "table" then
+		return nil
+	end
+	if type(raw.kind) ~= "string" or type(raw.payload) ~= "string" then
+		return nil
+	end
+	return {
+		label = type(raw.label) == "string" and raw.label or "Apply",
+		kind = raw.kind,
+		payload = raw.payload,
+	}
+end
+
 local function parse_solution_text(text)
 	local result = decode_json(text)
 	if not result then
 		return nil, "model did not return valid JSON contract"
 	end
 
+	local suggestions = {}
+	if vim.tbl_islist(result.suggestions) then
+		for _, suggestion in ipairs(result.suggestions) do
+			local normalized = normalize_suggestion(suggestion)
+			if normalized then
+				table.insert(suggestions, normalized)
+			end
+		end
+	end
+
 	return {
 		explanation = result.explanation or "",
 		steps = vim.tbl_islist(result.steps) and result.steps or {},
-		keys = result.keys or "",
+		suggestions = suggestions,
 	},
 		nil
 end
 
-function M.solve_async(cfg, prompt, request, cb)
+function M.solve_async(cfg, profile, prompt, request, cb)
 	local adapter, resolve_err = adapters.resolve(cfg)
 	if resolve_err then
 		cb(nil, resolve_err)
@@ -55,7 +79,7 @@ function M.solve_async(cfg, prompt, request, cb)
 		return nil
 	end
 
-	local req = adapter.build_request(prompt, request)
+	local req = adapter.build_request(prompt, request, profile)
 
 	return transport.send(req, function(response, request_err)
 		if request_err then

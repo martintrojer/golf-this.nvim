@@ -1,6 +1,6 @@
-local adapters = require("golf_this.adapters")
-local config = require("golf_this.config")
-local shared = require("golf_this.adapters.shared")
+local adapters = require("promptly.adapters")
+local config = require("promptly.config")
+local shared = require("promptly.adapters.shared")
 
 local M = {}
 
@@ -31,7 +31,7 @@ end
 
 function M.check()
 	local health = health_api()
-	health.start("golf-this.nvim")
+	health.start("promptly.nvim")
 
 	if vim.fn.executable("curl") == 1 then
 		health.ok("curl executable found")
@@ -39,13 +39,16 @@ function M.check()
 		health.error("curl executable not found; model requests will fail")
 	end
 
-	local provider_name = config.values.provider
+	local profile_name = config.current_profile_name()
+	local profile = config.current_profile()
+	local provider_name = profile and profile.provider or nil
 	local provider = config.current_provider()
 	if not provider then
 		health.error("configured provider '" .. tostring(provider_name) .. "' not found in setup().providers")
 		return
 	end
 
+	health.info("active profile: " .. tostring(profile_name))
 	health.info("active provider: " .. tostring(provider_name))
 
 	local kind = provider.kind or "openai_compatible"

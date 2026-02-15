@@ -22,27 +22,31 @@ function M.get_api_key(cfg)
 	return nil, nil
 end
 
-function M.system_prompt()
+function M.system_prompt(_profile)
 	return table.concat({
-		"You are a Vim golf assistant.",
-		"Return ONLY valid JSON with keys: explanation (string), steps (array of strings), keys (string).",
+		"You are a Neovim editing assistant.",
+		"Return ONLY valid JSON with keys: explanation (string), steps (array of strings), suggestions (array).",
 		"explanation must be short (<= 2 sentences).",
 		"steps must be concise and actionable.",
-		"keys must be a single normal-mode keystroke sequence for nvim_feedkeys.",
+		"Each suggestions[] item must have: label (string), "
+			.. "kind (keys|replace_selection|replace_buffer|ex_command), payload (string).",
 		"Prefer robust motions/text-objects over line numbers when possible.",
-		"If unsafe or unknown, return empty keys and explain.",
+		"If unsafe or unknown, return empty suggestions and explain.",
 	}, " ")
 end
 
-function M.build_user_message(prompt, request)
+function M.build_user_message(prompt, request, _profile)
 	local lines = {
 		"Task:",
 		prompt,
 		"",
-		string.format("Current cursor line (%d):", request.current_row),
-		request.current_line,
-		"",
 	}
+
+	if request.include_current_line ~= false then
+		table.insert(lines, string.format("Current cursor line (%d):", request.current_row))
+		table.insert(lines, request.current_line)
+		table.insert(lines, "")
+	end
 
 	if request.selection then
 		table.insert(

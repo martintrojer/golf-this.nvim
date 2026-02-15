@@ -1,7 +1,7 @@
-local adapters = require("golf_this.adapters")
-local config = require("golf_this.config")
-local shared = require("golf_this.adapters.shared")
-local transport = require("golf_this.transport")
+local adapters = require("promptly.adapters")
+local config = require("promptly.config")
+local shared = require("promptly.adapters.shared")
+local transport = require("promptly.transport")
 
 local M = {}
 
@@ -15,15 +15,21 @@ local function status_line(ok, text)
 end
 
 function M.check()
-	local provider_name = config.values.provider
+	local profile_name = config.current_profile_name()
+	local profile = config.current_profile()
+	local provider_name = profile and profile.provider or nil
 	local provider = config.current_provider()
 
 	if not provider then
-		vim.notify("golf-this health\n[FAIL] provider not found in setup()", vim.log.levels.ERROR)
+		vim.notify("promptly health\n[FAIL] provider not found in setup()", vim.log.levels.ERROR)
 		return
 	end
 
-	local lines = { "golf-this health", string.format("provider: %s", provider_name) }
+	local lines = {
+		"promptly health",
+		string.format("profile: %s", tostring(profile_name)),
+		string.format("provider: %s", tostring(provider_name)),
+	}
 	local has_failures = false
 
 	local kind = provider.kind or "openai_compatible"
@@ -70,7 +76,7 @@ function M.check()
 		return
 	end
 
-	vim.notify("golf-this: running endpoint check...", vim.log.levels.INFO)
+	vim.notify("promptly: running endpoint check...", vim.log.levels.INFO)
 
 	transport.send({
 		method = "GET",

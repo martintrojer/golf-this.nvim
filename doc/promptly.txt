@@ -1,0 +1,71 @@
+*promptly.txt* *promptly*  prompt-driven editing helper for Neovim
+
+Author: martintrojer
+
+===============================================================================
+CONTENTS                                                        *promptly-contents*
+
+1. Introduction..................................................|promptly-intro|
+2. Setup.........................................................|promptly-setup|
+3. Commands...................................................|promptly-commands|
+4. Configuration.................................................|promptly-config|
+
+===============================================================================
+1. Introduction                                                     *promptly-intro*
+
+promptly.nvim asks a model for editing suggestions and can apply them to the
+current buffer.
+
+Supported suggestion kinds:
+- keys
+- replace_selection
+- replace_buffer
+- ex_command
+
+===============================================================================
+2. Setup                                                           *promptly-setup*
+
+>lua
+  require("promptly").setup({
+    profile = "promptly",
+  })
+<
+
+===============================================================================
+3. Commands                                                     *promptly-commands*
+
+:Promptly                                                      *:Promptly*
+  Open prompt popup and request suggestions.
+
+:PromptlyHealth                                            *:PromptlyHealth*
+  Check profile/provider configuration and endpoint reachability.
+
+===============================================================================
+4. Configuration                                                   *promptly-config*
+
+>lua
+  require("promptly").setup({
+    profile = "promptly",
+    providers = {
+      openrouter = {
+        kind = "openai_compatible",
+        url = "https://openrouter.ai/api/v1/chat/completions",
+        model = "anthropic/claude-3.5-sonnet",
+        api_key_env = "OPENROUTER_API_KEY",
+      },
+    },
+    profiles = {
+      promptly = {
+        provider = "openrouter",
+        include_in_prompt = "use lazyvim key bindings",
+        context = {
+          max_context_lines = 400,
+          include_current_line = true,
+          include_selection = true,
+        },
+      },
+    },
+  })
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -4,7 +4,8 @@ local event = require("nui.utils.autocmd").event
 
 local M = {}
 
-function M.prompt(on_submit)
+function M.prompt(profile, on_submit)
+	local prompt_title = ((profile or {}).ui or {}).prompt_title or " Promptly Prompt "
 	local input
 	input = Input({
 		relative = "cursor",
@@ -18,7 +19,7 @@ function M.prompt(on_submit)
 		border = {
 			style = "rounded",
 			text = {
-				top = " Golf This Prompt ",
+				top = prompt_title,
 			},
 		},
 		win_options = {
@@ -43,9 +44,10 @@ function M.prompt(on_submit)
 	end, { buffer = input.bufnr, nowait = true })
 end
 
-function M.result(answer, on_do_it)
+function M.result(answer, profile, on_apply)
+	local result_title = ((profile or {}).ui or {}).result_title or " Promptly Suggestions "
 	local lines = {
-		"Golf This",
+		"Promptly",
 		"",
 		"Explanation:",
 		answer.explanation ~= "" and answer.explanation or "(none)",
@@ -62,10 +64,19 @@ function M.result(answer, on_do_it)
 	end
 
 	table.insert(lines, "")
-	if answer.keys ~= "" then
-		table.insert(lines, "<CR>: Do It    <Esc>/q: Close")
-	else
+	table.insert(lines, "Suggestions:")
+
+	if #answer.suggestions == 0 then
+		table.insert(lines, "- (none)")
+		table.insert(lines, "")
 		table.insert(lines, "<Esc>/q: Close")
+	else
+		for i, suggestion in ipairs(answer.suggestions) do
+			local label = suggestion.label or "Apply"
+			table.insert(lines, string.format("%d. %s [%s]", i, label, suggestion.kind))
+		end
+		table.insert(lines, "")
+		table.insert(lines, "<CR>: Apply #1   1-9: Apply choice   <Esc>/q: Close")
 	end
 
 	local popup = Popup({
@@ -80,7 +91,7 @@ function M.result(answer, on_do_it)
 		border = {
 			style = "rounded",
 			text = {
-				top = " Golf This Answer ",
+				top = result_title,
 			},
 		},
 		win_options = {
@@ -99,11 +110,18 @@ function M.result(answer, on_do_it)
 	vim.keymap.set("n", "<Esc>", close, { buffer = popup.bufnr, nowait = true })
 	vim.keymap.set("n", "q", close, { buffer = popup.bufnr, nowait = true })
 
-	if answer.keys ~= "" then
+	if #answer.suggestions > 0 then
 		vim.keymap.set("n", "<CR>", function()
 			close()
-			on_do_it(answer.keys)
+			on_apply(answer.suggestions[1])
 		end, { buffer = popup.bufnr, nowait = true })
+
+		for i = 1, math.min(9, #answer.suggestions) do
+			vim.keymap.set("n", tostring(i), function()
+				close()
+				on_apply(answer.suggestions[i])
+			end, { buffer = popup.bufnr, nowait = true })
+		end
 	end
 end
 

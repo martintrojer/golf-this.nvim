@@ -1,5 +1,5 @@
-local openai_compatible = require("golf_this.adapters.openai_compatible")
-local anthropic = require("golf_this.adapters.anthropic")
+local openai_compatible = require("promptly.adapters.openai_compatible")
+local anthropic = require("promptly.adapters.anthropic")
 
 local M = {}
 
