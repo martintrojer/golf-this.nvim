@@ -25,11 +25,15 @@
   - Remote: OpenAI-compatible APIs (`openai`, `openrouter`) and native `anthropic`
   - Local: Ollama OpenAI-compatible endpoint
 
-## Install (lazy.nvim)
+## Install
+
+Repository: [https://github.com/martintrojer/golf-this.nvim](https://github.com/martintrojer/golf-this.nvim)
+
+### lazy.nvim
 
 ```lua
 {
-  "martintrojer/golf-this",
+  "martintrojer/golf-this.nvim",
   dependencies = {
     "MunifTanjim/nui.nvim",
     "nvim-lua/plenary.nvim", -- fallback HTTP path for older Neovim
@@ -70,6 +74,54 @@
     })
   end,
 }
+```
+
+### vim-plug
+
+```vim
+Plug 'martintrojer/golf-this.nvim'
+Plug 'MunifTanjim/nui.nvim'
+Plug 'nvim-lua/plenary.nvim'
+```
+
+Then configure in Lua:
+
+```lua
+require("golf_this").setup({
+  provider = "openai",
+})
+```
+
+## Local development
+
+Clone locally:
+
+```bash
+git clone https://github.com/martintrojer/golf-this.nvim ~/code/golf-this.nvim
+```
+
+Use local path with lazy.nvim:
+
+```lua
+{
+  dir = "~/code/golf-this.nvim",
+  name = "golf-this.nvim",
+  dependencies = {
+    "MunifTanjim/nui.nvim",
+    "nvim-lua/plenary.nvim",
+  },
+  config = function()
+    require("golf_this").setup({
+      provider = "openai",
+    })
+  end,
+}
+```
+
+If you edit help docs, regenerate tags:
+
+```vim
+:helptags ~/code/golf-this.nvim/doc
 ```
 
 ## Usage
