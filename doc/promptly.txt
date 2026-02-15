@@ -27,7 +27,15 @@ Supported suggestion kinds:
 
 >lua
   require("promptly").setup({
-    profile = "promptly",
+    providers = {
+      openai = {},
+    },
+    profiles = {
+      promptly = {
+        provider = "openai",
+        system_message = "You are a Neovim editing assistant. Prefer safe, minimal edits.",
+      },
+    },
   })
 <
 
@@ -47,10 +55,11 @@ Supported suggestion kinds:
 4. Configuration                                                   *promptly-config*
 
 `profiles.<name>.system_message` is required and must be a non-empty string.
+Promptly starts on the first profile (sorted by name), and you can switch
+profiles from the prompt popup.
 
 >lua
   require("promptly").setup({
-    profile = "code_assist",
     providers = {
       openrouter = {
         kind = "openai_compatible", -- optional for built-ins

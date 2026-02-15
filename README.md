@@ -35,6 +35,7 @@ Every profile must point to a provider name:
 
 - `profiles.<name>.provider` is required.
 - `profiles.<name>.system_message` is required and must be a non-empty string.
+- Promptly starts on the first profile (sorted by name), and you can switch in the popup.
 
 Inside `providers.<name>`:
 
@@ -62,8 +63,6 @@ Provider-specific optional fields:
 
 ```lua
 require("promptly").setup({
-  profile = "code_assist",
-
   providers = {
     openrouter = {
       kind = "openai_compatible", -- optional (inferred for built-in provider names)
@@ -104,12 +103,10 @@ require("promptly").setup({
 
 ## Configuration example (golf_this profile)
 
-Use a dedicated profile named `golf_this` and make it active:
+Use a dedicated profile named `golf_this`:
 
 ```lua
 require("promptly").setup({
-  profile = "golf_this",
-
   providers = {
     openrouter = {
       kind = "openai_compatible", -- optional (inferred)

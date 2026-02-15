@@ -2,7 +2,6 @@ local M = {}
 M.validation_error = nil
 
 local defaults = {
-	profile = "promptly",
 	providers = {
 		openai = {
 			kind = "openai_compatible",
@@ -134,6 +133,11 @@ end
 function M.setup(opts)
 	M.values = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
 	M.validation_error = nil
+	local names = M.profile_names()
+	if #names == 0 then
+		M.validation_error = "no profiles configured in setup().profiles"
+		return
+	end
 
 	for profile_name, profile in pairs(M.values.profiles or {}) do
 		if type(profile.system_message) ~= "string" or vim.trim(profile.system_message) == "" then
@@ -190,7 +194,8 @@ function M.profile_by_name(profile_name)
 end
 
 function M.current_profile_name()
-	return M.values.profile
+	local names = M.profile_names()
+	return names[1]
 end
 
 function M.current_profile_error()
