@@ -32,7 +32,7 @@ Do not introduce `golf-this`/`golf_this` naming in code, docs, or commands.
 Use profile-based configuration:
 
 - Top-level: `profile`, `providers`, `profiles`
-- Active profile defines prompt context, UI titles, and apply behavior.
+- Active profile defines `system_message` (required, non-empty), prompt context, UI titles, and apply behavior.
 
 ## Suggestion Contract
 

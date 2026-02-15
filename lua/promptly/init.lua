@@ -86,20 +86,6 @@ local function feed_keys(keys)
 	vim.api.nvim_feedkeys(replaced, "n", false)
 end
 
-local function build_effective_prompt(prompt, profile)
-	local suffix = profile.include_in_prompt
-	if type(suffix) ~= "string" then
-		return prompt
-	end
-
-	suffix = vim.trim(suffix)
-	if suffix == "" then
-		return prompt
-	end
-
-	return prompt .. "\n\nAdditional instruction:\n" .. suffix
-end
-
 local function replace_buffer(text)
 	local lines = vim.split(text, "\n", { plain = true })
 	vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
@@ -153,7 +139,8 @@ function M.run(opts)
 
 	local profile = config.current_profile()
 	if not profile then
-		vim.notify("promptly: invalid profile configuration", vim.log.levels.ERROR)
+		local err = config.current_profile_error() or "invalid profile configuration"
+		vim.notify("promptly: " .. err, vim.log.levels.ERROR)
 		return
 	end
 
@@ -172,9 +159,8 @@ function M.run(opts)
 
 		request_lock = true
 		local stop_spinner = start_spinner("thinking...")
-		local effective_prompt = build_effective_prompt(prompt, profile)
 
-		model.solve_async(provider, profile, effective_prompt, request, function(answer, err)
+		model.solve_async(provider, profile, prompt, request, function(answer, err)
 			request_lock = false
 			if err then
 				stop_spinner("promptly: request failed", "ErrorMsg")

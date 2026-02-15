@@ -43,23 +43,36 @@ Supported suggestion kinds:
 ===============================================================================
 4. Configuration                                                   *promptly-config*
 
+`profiles.<name>.system_message` is required and must be a non-empty string.
+
 >lua
   require("promptly").setup({
-    profile = "promptly",
+    profile = "code_assist",
     providers = {
       openrouter = {
-        kind = "openai_compatible",
-        url = "https://openrouter.ai/api/v1/chat/completions",
-        model = "anthropic/claude-3.5-sonnet",
-        api_key_env = "OPENROUTER_API_KEY",
+        kind = "openai_compatible", -- optional for built-ins
+        url = "https://openrouter.ai/api/v1/chat/completions", -- optional
+        model = "openai/gpt-4.1-mini", -- optional
+        api_key_env = "OPENROUTER_API_KEY", -- optional (inferred)
+        referer = "https://your-site.example", -- optional
+        title = "promptly.nvim", -- optional
       },
     },
     profiles = {
-      promptly = {
+      code_assist = {
         provider = "openrouter",
-        include_in_prompt = "use lazyvim key bindings",
+        system_message = "You are a Neovim coding assistant. Prefer safe, minimal edits.",
         context = {
           max_context_lines = 400,
+          include_current_line = true,
+          include_selection = true,
+        },
+      },
+      golf_this = {
+        provider = "openrouter",
+        system_message = "You are a Vim golf specialist. Return shortest robust normal-mode sequences.",
+        context = {
+          max_context_lines = 250,
           include_current_line = true,
           include_selection = true,
         },

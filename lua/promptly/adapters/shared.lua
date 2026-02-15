@@ -22,8 +22,8 @@ function M.get_api_key(cfg)
 	return nil, nil
 end
 
-function M.system_prompt(_profile)
-	return table.concat({
+function M.system_prompt(profile)
+	local parts = {
 		"You are a Neovim editing assistant.",
 		"Return ONLY valid JSON with keys: explanation (string), steps (array of strings), suggestions (array).",
 		"explanation must be short (<= 2 sentences).",
@@ -32,7 +32,17 @@ function M.system_prompt(_profile)
 			.. "kind (keys|replace_selection|replace_buffer|ex_command), payload (string).",
 		"Prefer robust motions/text-objects over line numbers when possible.",
 		"If unsafe or unknown, return empty suggestions and explain.",
-	}, " ")
+	}
+
+	local custom = type(profile) == "table" and profile.system_message or nil
+	if type(custom) == "string" then
+		custom = vim.trim(custom)
+		if custom ~= "" then
+			table.insert(parts, "Additional system instruction: " .. custom)
+		end
+	end
+
+	return table.concat(parts, " ")
 end
 
 function M.build_user_message(prompt, request, _profile)

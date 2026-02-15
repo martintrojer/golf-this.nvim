@@ -41,6 +41,11 @@ function M.check()
 
 	local profile_name = config.current_profile_name()
 	local profile = config.current_profile()
+	local profile_err = config.current_profile_error()
+	if profile_err then
+		health.error(profile_err)
+		return
+	end
 	local provider_name = profile and profile.provider or nil
 	local provider = config.current_provider()
 	if not provider then

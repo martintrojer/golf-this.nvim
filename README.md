@@ -34,6 +34,7 @@ export ANTHROPIC_API_KEY="..."
 Every profile must point to a provider name:
 
 - `profiles.<name>.provider` is required.
+- `profiles.<name>.system_message` is required and must be a non-empty string.
 
 Inside `providers.<name>`:
 
@@ -57,17 +58,17 @@ Provider-specific optional fields:
 - OpenRouter: `referer`, `title`
 - Anthropic: `anthropic_version`, `max_tokens`
 
-## Configuration
+## Configuration example (general coding assistant)
 
 ```lua
 require("promptly").setup({
-  profile = "promptly",
+  profile = "code_assist",
 
   providers = {
     openrouter = {
       kind = "openai_compatible", -- optional (inferred for built-in provider names)
       url = "https://openrouter.ai/api/v1/chat/completions", -- optional (inferred)
-      model = "anthropic/claude-3.5-sonnet", -- optional (inferred default exists)
+      model = "openai/gpt-4.1-mini", -- optional (inferred default exists)
       api_key_env = "OPENROUTER_API_KEY", -- optional (inferred to OPENROUTER_API_KEY)
       referer = "https://your-site.example", -- optional (OpenRouter)
       title = "promptly.nvim", -- optional (OpenRouter)
@@ -75,9 +76,9 @@ require("promptly").setup({
   },
 
   profiles = {
-    promptly = {
+    code_assist = {
       provider = "openrouter",
-      include_in_prompt = "use lazyvim key bindings",
+      system_message = "You are a Neovim coding assistant. Prefer safe, minimal edits and explain tradeoffs briefly.", -- required
       context = {
         max_context_lines = 400,
         include_current_line = true,
@@ -101,7 +102,7 @@ require("promptly").setup({
 })
 ```
 
-## Golf This setup (with promptly)
+## Configuration example (golf_this profile)
 
 Use a dedicated profile named `golf_this` and make it active:
 
@@ -123,7 +124,7 @@ require("promptly").setup({
   profiles = {
     golf_this = {
       provider = "openrouter",
-      include_in_prompt = "Solve this as Vim golf. Prefer shortest robust normal-mode key sequence.",
+      system_message = "You are a Vim golf specialist. Return shortest robust normal-mode sequences and avoid brittle absolute line-number jumps.", -- required
       context = {
         max_context_lines = 250,
         include_current_line = true,
@@ -132,6 +133,9 @@ require("promptly").setup({
       ui = {
         prompt_title = " Golf Prompt ",
         result_title = " Golf Suggestions ",
+      },
+      apply = {
+        default = "first_suggestion",
       },
     },
   },

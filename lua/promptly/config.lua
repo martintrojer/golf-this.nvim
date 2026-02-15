@@ -1,4 +1,5 @@
 local M = {}
+M.validation_error = nil
 
 local defaults = {
 	profile = "promptly",
@@ -35,7 +36,7 @@ local defaults = {
 	profiles = {
 		promptly = {
 			provider = "openai",
-			include_in_prompt = "",
+			system_message = "You are a Neovim editing assistant. Prefer safe, minimal edits.",
 			context = {
 				max_context_lines = 400,
 				include_current_line = true,
@@ -132,6 +133,17 @@ end
 
 function M.setup(opts)
 	M.values = vim.tbl_deep_extend("force", vim.deepcopy(defaults), opts or {})
+	M.validation_error = nil
+
+	for profile_name, profile in pairs(M.values.profiles or {}) do
+		if type(profile.system_message) ~= "string" or vim.trim(profile.system_message) == "" then
+			M.validation_error = string.format(
+				"profiles.%s.system_message is required and must be a non-empty string",
+				tostring(profile_name)
+			)
+			break
+		end
+	end
 end
 
 function M.current_provider()
@@ -152,16 +164,44 @@ function M.current_provider()
 end
 
 function M.current_profile()
+	if M.validation_error then
+		return nil
+	end
+
 	local profile_name = M.values.profile
 	local profile = M.values.profiles and M.values.profiles[profile_name] or nil
 	if not profile then
 		return nil
 	end
+
+	if type(profile.system_message) ~= "string" or vim.trim(profile.system_message) == "" then
+		return nil
+	end
+
 	return vim.deepcopy(profile)
 end
 
 function M.current_profile_name()
 	return M.values.profile
+end
+
+function M.current_profile_error()
+	if M.validation_error then
+		return M.validation_error
+	end
+
+	local profile_name = M.values.profile
+	local profile = M.values.profiles and M.values.profiles[profile_name] or nil
+	if not profile then
+		return string.format("profile '%s' not found in setup().profiles", tostring(profile_name))
+	end
+	if type(profile.system_message) ~= "string" or vim.trim(profile.system_message) == "" then
+		return string.format(
+			"profiles.%s.system_message is required and must be a non-empty string",
+			tostring(profile_name)
+		)
+	end
+	return nil
 end
 
 return M
