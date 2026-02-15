@@ -115,6 +115,7 @@ from provider name/URL family for OpenAI, OpenRouter, Anthropic, and Ollama.
 >lua
   require("golf_this").setup({
     provider = "openrouter",
+    include_in_prompt = "use lazyvim key bindings",
     max_context_lines = 400,
     providers = {
       openrouter = {
@@ -128,6 +129,10 @@ from provider name/URL family for OpenAI, OpenRouter, Anthropic, and Ollama.
     },
   })
 <
+
+`include_in_prompt`:
+- Appends a static instruction string to every prompt before request.
+- Useful for persistent style hints, e.g. "use lazyvim key bindings".
 
 ===============================================================================
 8. Providers                                               *golf-this-providers*

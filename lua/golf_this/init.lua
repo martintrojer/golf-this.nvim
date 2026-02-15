@@ -84,6 +84,20 @@ local function feed_keys(keys)
   vim.api.nvim_feedkeys(replaced, "n", false)
 end
 
+local function build_effective_prompt(prompt)
+  local suffix = config.values.include_in_prompt
+  if type(suffix) ~= "string" then
+    return prompt
+  end
+
+  suffix = vim.trim(suffix)
+  if suffix == "" then
+    return prompt
+  end
+
+  return prompt .. "\n\nAdditional instruction:\n" .. suffix
+end
+
 function M.run(opts)
   if request_lock then
     vim.notify("golf-this: request already running", vim.log.levels.WARN)
@@ -106,7 +120,9 @@ function M.run(opts)
     request_lock = true
     local stop_spinner = start_spinner("thinking...")
 
-    model.solve_async(provider, prompt, request, function(answer, err)
+    local effective_prompt = build_effective_prompt(prompt)
+
+    model.solve_async(provider, effective_prompt, request, function(answer, err)
       request_lock = false
       if err then
         stop_spinner("golf-this: request failed", "ErrorMsg")

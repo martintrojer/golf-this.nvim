@@ -61,6 +61,7 @@ Minimal setup (provider internals inferred):
 ```lua
 require("golf_this").setup({
   provider = "openrouter", -- openai | openrouter | anthropic | ollama
+  include_in_prompt = "use lazyvim key bindings", -- optional
 })
 ```
 
@@ -74,6 +75,7 @@ require("golf_this").setup({
   config = function()
     require("golf_this").setup({
       provider = "openai", -- openai | openrouter | anthropic | ollama
+      include_in_prompt = "use lazyvim key bindings", -- optional
       providers = {
         openai = {
           kind = "openai_compatible", -- optional
@@ -146,6 +148,7 @@ Use local path with lazy.nvim:
   config = function()
     require("golf_this").setup({
       provider = "openai",
+      include_in_prompt = "use lazyvim key bindings", -- optional
     })
   end,
 }
@@ -166,6 +169,9 @@ If you edit help docs, regenerate tags:
 - Health check:
   - Run `:GolfThisHealth` to validate provider config, key resolution, and endpoint reachability.
   - Run `:checkhealth golf_this` for Neovim health-style diagnostics.
+- Prompt customization:
+  - `include_in_prompt` appends a static instruction to every request.
+  - Example: `include_in_prompt = "use lazyvim key bindings"`.
 
 In the response popup:
 - Press `<Esc>` or `q` to close.

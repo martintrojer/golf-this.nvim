@@ -2,6 +2,7 @@ local M = {}
 
 local defaults = {
   provider = "openai",
+  include_in_prompt = "",
   providers = {
     openai = {
       kind = "openai_compatible",
