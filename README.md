@@ -52,7 +52,17 @@ If omitted, `golf-this` infers defaults for common providers:
 - Anthropic
 - Ollama
 
+For these built-in providers, `kind`, `url`, `model`, and `api_key_env` are optional unless you want custom overrides.
+
 ### lazy.nvim
+
+Minimal setup (provider internals inferred):
+
+```lua
+require("golf_this").setup({
+  provider = "openrouter", -- openai | openrouter | anthropic | ollama
+})
+```
 
 ```lua
 {
@@ -66,32 +76,32 @@ If omitted, `golf-this` infers defaults for common providers:
       provider = "openai", -- openai | openrouter | anthropic | ollama
       providers = {
         openai = {
-          kind = "openai_compatible",
-          url = "https://api.openai.com/v1/chat/completions",
-          model = "gpt-4.1-mini",
-          api_key_env = "OPENAI_API_KEY",
+          kind = "openai_compatible", -- optional
+          url = "https://api.openai.com/v1/chat/completions", -- optional
+          model = "gpt-4.1-mini", -- optional
+          api_key_env = "OPENAI_API_KEY", -- optional
         },
         openrouter = {
-          kind = "openai_compatible",
-          url = "https://openrouter.ai/api/v1/chat/completions",
-          model = "anthropic/claude-3.5-sonnet",
-          api_key_env = "OPENROUTER_API_KEY",
+          kind = "openai_compatible", -- optional
+          url = "https://openrouter.ai/api/v1/chat/completions", -- optional
+          model = "anthropic/claude-3.5-sonnet", -- optional
+          api_key_env = "OPENROUTER_API_KEY", -- optional
           referer = "https://your-site.example", -- optional, recommended by OpenRouter
           title = "golf-this.nvim", -- optional
         },
         anthropic = {
-          kind = "anthropic",
-          url = "https://api.anthropic.com/v1/messages",
-          model = "claude-3-5-sonnet-latest",
-          api_key_env = "ANTHROPIC_API_KEY",
-          anthropic_version = "2023-06-01",
-          max_tokens = 600,
+          kind = "anthropic", -- optional
+          url = "https://api.anthropic.com/v1/messages", -- optional
+          model = "claude-3-5-sonnet-latest", -- optional
+          api_key_env = "ANTHROPIC_API_KEY", -- optional
+          anthropic_version = "2023-06-01", -- optional
+          max_tokens = 600, -- optional
         },
         ollama = {
-          kind = "openai_compatible",
-          url = "http://localhost:11434/v1/chat/completions",
-          model = "qwen2.5-coder:7b",
-          api_key_env = nil,
+          kind = "openai_compatible", -- optional
+          url = "http://localhost:11434/v1/chat/completions", -- optional
+          model = "qwen2.5-coder:7b", -- optional
+          api_key_env = nil, -- optional
         },
       },
     })
