@@ -29,6 +29,34 @@ export OPENROUTER_API_KEY="..."
 export ANTHROPIC_API_KEY="..."
 ```
 
+## Provider fields: required vs optional
+
+Every profile must point to a provider name:
+
+- `profiles.<name>.provider` is required.
+
+Inside `providers.<name>`:
+
+- `kind`, `url`, `model`, `api_key_env` are optional for built-in families:
+  - `openai`
+  - `openrouter`
+  - `anthropic`
+  - `ollama`
+- Promptly infers defaults for those families from provider name and/or URL.
+- `api_key_env` is optional for local providers (for example Ollama).
+
+If you use a custom provider name/URL that does not match a built-in family:
+
+- `kind` is required (`openai_compatible` or `anthropic`)
+- `url` is required
+- `model` is required
+- `api_key_env` (or `api_key`) is required for authenticated remote endpoints
+
+Provider-specific optional fields:
+
+- OpenRouter: `referer`, `title`
+- Anthropic: `anthropic_version`, `max_tokens`
+
 ## Configuration
 
 ```lua
@@ -37,10 +65,12 @@ require("promptly").setup({
 
   providers = {
     openrouter = {
-      kind = "openai_compatible",
-      url = "https://openrouter.ai/api/v1/chat/completions",
-      model = "anthropic/claude-3.5-sonnet",
-      api_key_env = "OPENROUTER_API_KEY",
+      kind = "openai_compatible", -- optional (inferred for built-in provider names)
+      url = "https://openrouter.ai/api/v1/chat/completions", -- optional (inferred)
+      model = "anthropic/claude-3.5-sonnet", -- optional (inferred default exists)
+      api_key_env = "OPENROUTER_API_KEY", -- optional (inferred to OPENROUTER_API_KEY)
+      referer = "https://your-site.example", -- optional (OpenRouter)
+      title = "promptly.nvim", -- optional (OpenRouter)
     },
   },
 
@@ -70,6 +100,48 @@ require("promptly").setup({
   },
 })
 ```
+
+## Golf This setup (with promptly)
+
+Use a dedicated profile named `golf_this` and make it active:
+
+```lua
+require("promptly").setup({
+  profile = "golf_this",
+
+  providers = {
+    openrouter = {
+      kind = "openai_compatible", -- optional (inferred)
+      url = "https://openrouter.ai/api/v1/chat/completions", -- optional (inferred)
+      model = "anthropic/claude-3.5-sonnet", -- optional (inferred default exists)
+      api_key_env = "OPENROUTER_API_KEY", -- optional (inferred to OPENROUTER_API_KEY)
+      referer = "https://your-site.example", -- optional
+      title = "promptly.nvim", -- optional
+    },
+  },
+
+  profiles = {
+    golf_this = {
+      provider = "openrouter",
+      include_in_prompt = "Solve this as Vim golf. Prefer shortest robust normal-mode key sequence.",
+      context = {
+        max_context_lines = 250,
+        include_current_line = true,
+        include_selection = true,
+      },
+      ui = {
+        prompt_title = " Golf Prompt ",
+        result_title = " Golf Suggestions ",
+      },
+    },
+  },
+})
+```
+
+Then run:
+
+- `:Promptly` for current line
+- `:'<,'>Promptly` for a selected range
 
 ## Commands
 
