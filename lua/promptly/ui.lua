@@ -5,6 +5,17 @@ local event = require("nui.utils.autocmd").event
 local M = {}
 local PREVIEW_MAX = 100
 
+local function begin_input_guard()
+	local ok = pcall(vim.fn.inputsave)
+	return ok
+end
+
+local function end_input_guard(token)
+	if token then
+		pcall(vim.fn.inputrestore)
+	end
+end
+
 local function payload_preview(payload)
 	if type(payload) ~= "string" or payload == "" then
 		return nil
@@ -72,18 +83,32 @@ function M.prompt(opts, on_submit)
 		prompt = "> ",
 		default_value = "",
 		on_submit = function(value)
+			local token = begin_input_guard()
 			input:unmount()
-			on_submit(value, selected_profile_name)
+			vim.schedule(function()
+				on_submit(value, selected_profile_name)
+				vim.defer_fn(function()
+					end_input_guard(token)
+				end, 150)
+			end)
 		end,
 	})
 
 	input:mount()
 	input:on(event.BufLeave, function()
+		local token = begin_input_guard()
 		input:unmount()
+		vim.defer_fn(function()
+			end_input_guard(token)
+		end, 40)
 	end)
 
 	vim.keymap.set({ "n", "i" }, "<Esc>", function()
+		local token = begin_input_guard()
 		input:unmount()
+		vim.defer_fn(function()
+			end_input_guard(token)
+		end, 40)
 	end, { buffer = input.bufnr, nowait = true })
 
 	vim.keymap.set({ "n", "i" }, "<Tab>", function()
@@ -174,7 +199,11 @@ function M.result(answer, profile, opts, on_apply)
 	vim.api.nvim_buf_set_lines(popup.bufnr, 0, -1, false, lines)
 
 	local function close()
+		local token = begin_input_guard()
 		popup:unmount()
+		vim.defer_fn(function()
+			end_input_guard(token)
+		end, 40)
 	end
 
 	vim.keymap.set("n", "<Esc>", close, { buffer = popup.bufnr, nowait = true })
@@ -182,14 +211,22 @@ function M.result(answer, profile, opts, on_apply)
 
 	if can_apply and #answer.suggestions > 0 then
 		vim.keymap.set("n", "<CR>", function()
-			close()
+			local token = begin_input_guard()
+			popup:unmount()
 			on_apply(answer.suggestions[1])
+			vim.defer_fn(function()
+				end_input_guard(token)
+			end, 80)
 		end, { buffer = popup.bufnr, nowait = true })
 
 		for i = 1, math.min(9, #answer.suggestions) do
 			vim.keymap.set("n", tostring(i), function()
-				close()
+				local token = begin_input_guard()
+				popup:unmount()
 				on_apply(answer.suggestions[i])
+				vim.defer_fn(function()
+					end_input_guard(token)
+				end, 80)
 			end, { buffer = popup.bufnr, nowait = true })
 		end
 	end
